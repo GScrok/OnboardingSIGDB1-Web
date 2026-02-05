@@ -1,0 +1,39 @@
+<div class="loading-overlay" *ngIf="isLoading">
+  <mat-spinner diameter="50"></mat-spinner>
+</div>
+
+<div class="page-container">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Histórico de cargos</h2>
+  </div>
+
+  <div class="container-timeline">
+    <div class="timeline">
+      <div
+        *ngFor="
+          let role of employeeRoleHistory;
+          let isLast = last;
+          let isFirst = first
+        "
+        class="timeline-item"
+      >
+        <div class="line" *ngIf="!isFirst"></div>
+
+        <div class="content-card mat-elevation-z2">
+          <span class="role-title">{{ role.roleName }}</span>
+          <span class="role-date">
+            <mat-icon class="icon-small">calendar_today</mat-icon>
+            {{ role.startDate | date: "dd/MM/yyyy" }}
+          </span>
+        </div>
+
+        <div class="line" *ngIf="!isLast"></div>
+      </div>
+    </div>
+  </div>
+  <div class="actions">
+    <button mat-stroked-button color="primary" routerLink="/employee">
+      Voltar
+    </button>
+  </div>
+</div>

@@ -1,0 +1,42 @@
+<div class="loading-overlay" *ngIf="isLoading">
+  <mat-spinner diameter="50"></mat-spinner>
+</div>
+
+<div class="page-container">
+  <h2 class="mb-4">Vincular empresa</h2>
+
+  <form [formGroup]="employeeForm" (ngSubmit)="onSave()" class="form-card">
+    <div class="row">
+      <div class="col-12">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Empresa</mat-label>
+          <mat-select formControlName="companyId">
+            <mat-option [value]="null">-- Selecione uma empresa --</mat-option>
+
+            <mat-option *ngFor="let company of companies" [value]="company.id">
+              {{ company.name }}
+            </mat-option>
+          </mat-select>
+          <mat-error
+            *ngIf="employeeForm.get('companyId')?.hasError('required')"
+            >Requirido</mat-error
+          >
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="d-flex gap-2 mt-3">
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        [disabled]="employeeForm.invalid"
+      >
+        Salvar
+      </button>
+      <button mat-raised-button type="button" (click)="onCancel()">
+        Voltar
+      </button>
+    </div>
+  </form>
+</div>
