@@ -56,6 +56,8 @@ export class LinkCompanyComponent implements OnInit {
         next: (data) => (this.employee = data),
         error: (err) => {
           this.toastr.error('Ocorreu um erro inesperado.', 'Erro');
+
+          this.router.navigate(['/employee']);
         },
       });
 
@@ -66,8 +68,6 @@ export class LinkCompanyComponent implements OnInit {
         next: (data) => (this.companies = data),
         error: (err) => {
           this.toastr.error('Ocorreu um erro inesperado.', 'Erro');
-
-          this.router.navigate(['/employee']);
         },
       });
   }

@@ -4,6 +4,7 @@ import { Component, OnInit } from '@angular/core';
 import { finalize } from 'rxjs';
 
 import { EmployeeRole } from './../../models/employee-role.model';
+import { Employee } from '../../models/employee.model';
 import { EmployeeService } from '../../services/employee.service';
 import { RoleService } from 'src/app/features/role/services/role.service';
 import { Role } from 'src/app/features/role/models/role.model';
@@ -17,6 +18,7 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class LinkRoleComponent implements OnInit {
   roles: Role[] = [];
+  employee: Employee | null = null;
 
   roleFilter: FormGroup;
   employeeRoleForm: FormGroup;
@@ -46,6 +48,18 @@ export class LinkRoleComponent implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     this.employeeId = Number(id);
 
+    this.employeeService
+      .getById(this.employeeId!)
+      .pipe(finalize(() => (this.isLoading = false)))
+      .subscribe({
+        next: (data) => (this.employee = data),
+        error: (err) => {
+          this.toastr.error('Ocorreu um erro inesperado.', 'Erro');
+
+          this.router.navigate(['/employee']);
+        },
+      });
+
     this.roleService.getByFilters(this.roleFilter.value).subscribe({
       next: (data) => (this.roles = data),
       error: (err) => {
@@ -59,9 +73,12 @@ export class LinkRoleComponent implements OnInit {
 
     this.isLoading = true;
 
-    try {
-      const employeeRole: EmployeeRole = this.employeeRoleForm.value;
-      this.employeeService.linkRole(this.employeeId!, employeeRole).subscribe({
+    const employeeRole: EmployeeRole = this.employeeRoleForm.value;
+
+      this.employeeService
+      .linkRole(this.employeeId!, employeeRole)
+      .pipe(finalize(() => (this.isLoading = false)))
+      .subscribe({
         next: () => this.onSuccess(),
         error: (err) => {
           if (err.error && err.error.errors) {
@@ -75,9 +92,6 @@ export class LinkRoleComponent implements OnInit {
           }
         },
       });
-    } finally {
-      this.isLoading = false;
-    }
   }
 
   onSuccess(): void {
