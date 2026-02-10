@@ -98,12 +98,7 @@ export class EmployeeListComponent implements OnInit {
   }
 
   clearFilter(): void {
-    this.filterForm = this.fb.group({
-      name: [''],
-      cnpj: [''],
-      startDate: [''],
-      endDate: [''],
-    });
+    this.filterForm.reset();
   }
 
   deleteEmployee(id: number): void {

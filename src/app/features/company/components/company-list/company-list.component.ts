@@ -97,12 +97,7 @@ export class CompanyListComponent implements OnInit {
   }
 
   clearFilter(): void {
-    this.filterForm = this.fb.group({
-      name: [''],
-      cnpj: [''],
-      startDate: [''],
-      endDate: [''],
-    });
+    this.filterForm.reset();
   }
 
   deleteCompany(id: number): void {

@@ -64,9 +64,7 @@ export class RoleListComponent implements OnInit {
   }
 
   clearFilter() {
-    this.filterForm = this.fb.group({
-      description: [''],
-    });
+    this.filterForm.reset();
   }
 
   deleteRole(id: number): void {
