@@ -22,6 +22,7 @@ import { LinkRoleComponent } from './components/link-role/link-role.component';
 
 import { NgxMaskDirective, NgxMaskPipe, provideNgxMask } from 'ngx-mask';
 import { EmployeeRoleHistoryComponent } from './components/employee-role-history/employee-role-history.component';
+import { EmployeeService } from './services/employee.service';
 
 @NgModule({
   declarations: [
@@ -49,6 +50,6 @@ import { EmployeeRoleHistoryComponent } from './components/employee-role-history
     MatOptionModule,
     MatProgressSpinnerModule,
   ],
-  providers: [provideNgxMask()],
+  providers: [provideNgxMask(), EmployeeService],
 })
 export class EmployeeModule {}

@@ -17,6 +17,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { NgxMaskDirective, NgxMaskPipe, provideNgxMask } from 'ngx-mask';
+import { CompanyService } from './services/company.service';
 
 @NgModule({
   declarations: [CompanyListComponent, CompanyFormComponent],
@@ -36,6 +37,6 @@ import { NgxMaskDirective, NgxMaskPipe, provideNgxMask } from 'ngx-mask';
     NgxMaskPipe,
     MatProgressSpinnerModule,
   ],
-  providers: [provideNgxMask()],
+  providers: [provideNgxMask(), CompanyService],
 })
 export class CompanyModule {}

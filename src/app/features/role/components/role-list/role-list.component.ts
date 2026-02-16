@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { finalize } from 'rxjs/operators';
 
-import { RoleService } from '../../services/role.service';
+import { AppRoutes } from 'src/app/shared/app-routes.config';
+
 import { Role } from '../../models/role.model';
-
-import { ToastrService } from 'ngx-toastr';
-import Swal from 'sweetalert2';
+import { RoleService } from '../../services/role.service';
+import { ErrorHandlingService } from 'src/app/core/error-handling/error-handling.service';
+import { NotificationService } from 'src/app/core/notification/notification.service';
 
 @Component({
   selector: 'app-role-list',
@@ -14,93 +14,74 @@ import Swal from 'sweetalert2';
   styleUrls: ['./role-list.component.scss'],
 })
 export class RoleListComponent implements OnInit {
-  isLoading = false;
+  protected routes = AppRoutes;
 
   roles: Role[] = [];
   displayedColumns: string[] = ['id', 'description', 'actions'];
 
-  filterForm: FormGroup;
+  filterForm!: FormGroup;
 
   constructor(
     private fb: FormBuilder,
     private roleService: RoleService,
-    private toastr: ToastrService,
-  ) {
+    private notificationService: NotificationService,
+    private errorHandlingService: ErrorHandlingService,
+  ) {}
+
+  ngOnInit(): void {
+    this.loadRoles();
+
+    this.buildCleanRoleFilter();
+  }
+
+  private buildCleanRoleFilter() {
     this.filterForm = this.fb.group({
       description: [''],
     });
   }
 
-  ngOnInit(): void {
-    this.loadRoles();
-  }
-
-  loadRoles(): void {
-    this.isLoading = true;
-
+  private loadRoles(): void {
     this.roleService
       .getAll()
-      .pipe(finalize(() => (this.isLoading = false)))
       .subscribe({
         next: (data) => (this.roles = data),
-        error: (err) => {
-          this.toastr.error('Ocorreu um erro inesperado.', 'Erro');
-        },
+        error: () => this.errorHandlingService.handleGenericError(),
       });
   }
 
-  onFilter(): void {
-    this.isLoading = true;
-
+  public onFilter(): void {
     this.roleService
       .getByFilters(this.filterForm.value)
-      .pipe(finalize(() => (this.isLoading = false)))
       .subscribe({
         next: (data) => (this.roles = data),
-        error: (err) => {
-          this.toastr.error('Ocorreu um erro inesperado.', 'Erro');
-        },
+        error: () => this.errorHandlingService.handleGenericError(),
       });
   }
 
-  clearFilter() {
-    this.filterForm.reset();
+  public clearFilter() {
+    this.buildCleanRoleFilter();
   }
 
-  deleteRole(id: number): void {
-    Swal.fire({
-      title: 'Deseja excluir este cargo?',
-      text: 'Você não poderá reverter isso!',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Sim, deletar!',
-      cancelButtonText: 'Cancelar',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.isLoading = true;
-        this.roleService
-          .delete(id)
-          .pipe(finalize(() => (this.isLoading = false)))
-          .subscribe({
-            next: () => {
-              this.toastr.success('Deletado com sucesso.', 'Sucesso!');
-              this.loadRoles();
-            },
-            error: (err) => {
-              if (err.error && err.error.errors) {
-                const errorList = err.error.errors;
+  public async deleteRole(id: number): Promise<void> {
+    const result = await this.notificationService.confirmation(
+      'Deseja excluir este cargo?',
+      'Você não poderá reverter isso!',
+    );
 
-                errorList.forEach((mensagem: string) => {
-                  this.toastr.error(mensagem, 'Erro');
-                });
-              } else {
-                this.toastr.error('Ocorreu um erro inesperado.', 'Erro');
-              }
-            },
-          });
-      }
-    });
+    if (result.isConfirmed) {
+      this.executeDelete(id);
+    }
+  }
+
+  private executeDelete(id: number) {
+    this.roleService
+      .delete(id)
+      .subscribe({
+        next: () => {
+          this.notificationService.success('Deletado com sucesso.');
+          this.loadRoles();
+        },
+        error: (err) => this.errorHandlingService.handleErrors(err),
+      });
   }
 }

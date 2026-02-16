@@ -1,15 +1,16 @@
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Component, OnInit } from '@angular/core';
-import { finalize } from 'rxjs';
+
+import { AppRoutes } from 'src/app/shared/app-routes.config';
 
 import { EmployeeRole } from './../../models/employee-role.model';
 import { Employee } from '../../models/employee.model';
-import { EmployeeService } from '../../services/employee.service';
-import { RoleService } from 'src/app/features/role/services/role.service';
 import { Role } from 'src/app/features/role/models/role.model';
-
-import { ToastrService } from 'ngx-toastr';
+import { RoleService } from 'src/app/features/role/services/role.service';
+import { EmployeeService } from '../../services/employee.service';
+import { ErrorHandlingService } from 'src/app/core/error-handling/error-handling.service';
+import { NotificationService } from 'src/app/core/notification/notification.service';
 
 @Component({
   selector: 'app-link-role',
@@ -17,15 +18,15 @@ import { ToastrService } from 'ngx-toastr';
   styleUrls: ['./link-role.component.scss'],
 })
 export class LinkRoleComponent implements OnInit {
+  protected routes = AppRoutes;
+
   roles: Role[] = [];
   employee: Employee | null = null;
 
-  roleFilter: FormGroup;
-  employeeRoleForm: FormGroup;
+  roleFilter!: FormGroup;
+  employeeRoleForm!: FormGroup;
 
   employeeId: number | null = null;
-
-  isLoading = false;
 
   constructor(
     private fb: FormBuilder,
@@ -33,73 +34,94 @@ export class LinkRoleComponent implements OnInit {
     private roleService: RoleService,
     private route: ActivatedRoute,
     private router: Router,
-    private toastr: ToastrService,
-  ) {
-    this.roleFilter = fb.group({
-      description: [''],
+    private notificationService: NotificationService,
+    private errorHandlingService: ErrorHandlingService,
+  ) {}
+
+  ngOnInit(): void {
+    this.buildCleanRoleFilter();
+    this.buildCleanEmployeeForm();
+
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.employeeId = Number(id);
+
+      this.getEmployeeById();
+
+      this.filterRole();
+    } else {
+      this.onError();
+    }
+  }
+
+  private filterRole() {
+    this.roleService.getByFilters(this.roleFilter.value).subscribe({
+      next: (data) => (this.roles = data),
+      error: () => {
+        this.notificationService.error('Ocorreu um erro inesperado.');
+      },
     });
-    this.employeeRoleForm = fb.group({
+  }
+
+  private getEmployeeById() {
+    this.employeeService.getById(this.employeeId!).subscribe({
+      next: (data) => (this.employee = data),
+      error: () => this.errorHandlingService.handleGenericError(this.routes.PATHS.EMPLOYEE.ROOT),
+    });
+  }
+
+  private onError() {
+    this.notificationService.error(
+      'Necessário informar o id na rota de pesquisa',
+    );
+
+    this.router.navigate(this.routes.LINKS.EMPLOYEE.LIST);
+  }
+
+  private buildCleanEmployeeForm() {
+    this.employeeRoleForm = this.fb.group({
       roleId: [null, [Validators.required, Validators.nullValidator]],
       startDate: [null, [Validators.required]],
     });
   }
 
-  ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('id');
-    this.employeeId = Number(id);
-
-    this.employeeService
-      .getById(this.employeeId!)
-      .pipe(finalize(() => (this.isLoading = false)))
-      .subscribe({
-        next: (data) => (this.employee = data),
-        error: (err) => {
-          this.toastr.error('Ocorreu um erro inesperado.', 'Erro');
-
-          this.router.navigate(['/employee']);
-        },
-      });
-
-    this.roleService.getByFilters(this.roleFilter.value).subscribe({
-      next: (data) => (this.roles = data),
-      error: (err) => {
-        this.toastr.error('Ocorreu um erro inesperado.', 'Erro');
-      },
+  private buildCleanRoleFilter() {
+    this.roleFilter = this.fb.group({
+      description: [''],
     });
   }
 
-  onSave(): void {
-    if (this.employeeRoleForm.invalid) return;
-
-    this.isLoading = true;
+  public onSave(): void {
+    if (!this.isFormValid()) {
+      return;
+    }
 
     const employeeRole: EmployeeRole = this.employeeRoleForm.value;
 
-      this.employeeService
-      .linkRole(this.employeeId!, employeeRole)
-      .pipe(finalize(() => (this.isLoading = false)))
-      .subscribe({
-        next: () => this.onSuccess(),
-        error: (err) => {
-          if (err.error && err.error.errors) {
-            const errorList = err.error.errors;
-
-            errorList.forEach((mensagem: string) => {
-              this.toastr.error(mensagem, 'Erro');
-            });
-          } else {
-            this.toastr.error('Ocorreu um erro inesperado.', 'Erro');
-          }
-        },
-      });
+    this.linkRole(employeeRole);
   }
 
-  onSuccess(): void {
-    this.toastr.success('Vinculado com sucesso');
-    this.router.navigate(['/employee']);
+  private isFormValid(): boolean {
+    if (this.employeeRoleForm.invalid) {
+      this.employeeRoleForm.markAllAsTouched();
+      return false;
+    }
+    return true;
   }
 
-  onCancel(): void {
-    this.router.navigate(['/employee']);
+  private linkRole(employeeRole: EmployeeRole) {
+    this.employeeService.linkRole(this.employeeId!, employeeRole).subscribe({
+      next: () => this.onSuccess(),
+      error: (err) => this.errorHandlingService.handleErrors(err),
+    });
+  }
+
+  private onSuccess(): void {
+    this.notificationService.success('Vinculado com sucesso');
+    this.router.navigate(this.routes.LINKS.EMPLOYEE.LIST);
+  }
+
+  public onCancel(): void {
+    this.router.navigate(this.routes.LINKS.EMPLOYEE.LIST);
   }
 }

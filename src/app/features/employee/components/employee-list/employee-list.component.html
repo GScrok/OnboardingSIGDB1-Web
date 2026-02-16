@@ -1,11 +1,7 @@
-<div class="loading-overlay" *ngIf="isLoading">
-  <mat-spinner diameter="50"></mat-spinner>
-</div>
-
 <div class="page-container">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Listagem de Funcionários</h2>
-    <button mat-raised-button color="primary" routerLink="/employee/new">
+    <button mat-raised-button color="primary" [routerLink]="routes.LINKS.EMPLOYEE.NEW">
       Novo
     </button>
   </div>
@@ -137,7 +133,7 @@
           </button>
 
           <mat-menu #menu="matMenu">
-            <button mat-menu-item [routerLink]="['/employee/edit', element.id]">
+            <button mat-menu-item [routerLink]="routes.LINKS.EMPLOYEE.EDIT(element.id)">
               <mat-icon>edit</mat-icon>
               <span>Editar</span>
             </button>
@@ -149,7 +145,7 @@
 
             <button
               mat-menu-item
-              [routerLink]="['/employee/link-company', element.id]"
+              [routerLink]="routes.LINKS.EMPLOYEE.LINK_COMPANY(element.id)"
               [disabled]="element.companyId"
             >
               <mat-icon>business</mat-icon>
@@ -158,7 +154,7 @@
 
             <button
               mat-menu-item
-              [routerLink]="['/employee/link-role', element.id]"
+              [routerLink]="routes.LINKS.EMPLOYEE.LINK_ROLE(element.id)"
               [disabled]="!element.companyId"
             >
               <mat-icon>work</mat-icon>
@@ -167,7 +163,7 @@
 
             <button
               mat-menu-item
-              [routerLink]="['/employee/role-history', element.id]"
+              [routerLink]="routes.LINKS.EMPLOYEE.ROLE_HISTORY(element.id)"
               [disabled]="!element.companyId"
             >
               <mat-icon>history</mat-icon>

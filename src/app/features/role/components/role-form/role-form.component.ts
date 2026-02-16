@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { finalize } from 'rxjs/operators';
 
-import { RoleService } from '../../services/role.service';
+import { AppRoutes } from 'src/app/shared/app-routes.config';
+
 import { Role } from '../../models/role.model';
-
-import { ToastrService } from 'ngx-toastr';
+import { RoleService } from '../../services/role.service';
+import { ErrorHandlingService } from 'src/app/core/error-handling/error-handling.service';
+import { NotificationService } from 'src/app/core/notification/notification.service';
 
 @Component({
   selector: 'app-role-form',
@@ -14,9 +15,9 @@ import { ToastrService } from 'ngx-toastr';
   styleUrls: ['./role-form.component.scss'],
 })
 export class RoleFormComponent implements OnInit {
-  isLoading = false;
+  protected routes = AppRoutes;
 
-  roleForm: FormGroup;
+  roleForm!: FormGroup;
   isEditMode = false;
   roleId: number | null = null;
 
@@ -25,88 +26,76 @@ export class RoleFormComponent implements OnInit {
     private roleService: RoleService,
     private router: Router,
     private route: ActivatedRoute,
-    private toastr: ToastrService,
-  ) {
+    private notificationService: NotificationService,
+    private errorHandlingService: ErrorHandlingService,
+  ) {}
+
+  ngOnInit(): void {
+    this.buildCleanRoleForm();
+
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.setEditMode(id);
+
+      this.getRoleById(this.roleId!);
+    }
+  }
+
+  private getRoleById(roleId: number) {
+    this.roleService
+      .getById(roleId)
+      .subscribe({
+        next: (data) => this.roleForm.patchValue(data),
+        error: () => {
+          this.notificationService.error('Ocorreu um erro inesperado.');
+        },
+      });
+  }
+
+  private setEditMode(id: string) {
+    this.isEditMode = true;
+    this.roleId = Number(id);
+  }
+
+  private buildCleanRoleForm() {
     this.roleForm = this.fb.group({
       description: ['', [Validators.required, Validators.maxLength(250)]],
     });
   }
 
-  ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.isLoading = true;
-
-      this.isEditMode = true;
-      this.roleId = Number(id);
-
-      this.roleService
-        .getById(this.roleId)
-        .pipe(finalize(() => (this.isLoading = false)))
-        .subscribe({
-          next: (data) => this.roleForm.patchValue(data),
-          error: (err) => {
-              this.toastr.error('Ocorreu um erro inesperado.', 'Erro');
-          },
-        });
+  public onSave(): void {
+    if (!this.isFormValid()) {
+      return;
     }
-  }
-
-  onSave(): void {
-    if (this.roleForm.invalid) return;
 
     const role: Role = this.roleForm.value;
 
-    this.isLoading = true;
+    this.executeSave(role);
+  }
 
-    if (this.isEditMode && this.roleId) {
-      role.id = this.roleId;
-      this.roleService
-        .update(role)
-        .pipe(finalize(() => (this.isLoading = false)))
-        .subscribe({
-          next: () => this.onSuccess(),
-          error: (err) => {
-            if (err.error && err.error.errors) {
-              const errorList = err.error.errors;
-
-              errorList.forEach((mensagem: string) => {
-                this.toastr.error(mensagem, 'Erro');
-              });
-            } else {
-              this.toastr.error('Ocorreu um erro inesperado.', 'Erro');
-
-              this.router.navigate(['/role'])
-            }
-          },
-        });
-    } else {
-      this.roleService
-        .create(role)
-        .pipe(finalize(() => (this.isLoading = false)))
-        .subscribe({
-          next: () => this.onSuccess(),
-          error: (err) => {
-            if (err.error && err.error.errors) {
-              const errorList = err.error.errors;
-
-              errorList.forEach((mensagem: string) => {
-                this.toastr.error(mensagem, 'Erro');
-              });
-            } else {
-              this.toastr.error('Ocorreu um erro inesperado.', 'Erro');
-            }
-          },
-        });
+  private isFormValid(): boolean {
+    if (this.roleForm.invalid) {
+      this.roleForm.markAllAsTouched();
+      return false;
     }
+    return true;
   }
 
-  onSuccess(): void {
-    this.toastr.success('Salvo com sucesso');
-    this.router.navigate(['/role']);
+  private executeSave(role: Role) {
+    this.roleService
+      .save(role)
+      .subscribe({
+        next: () => this.onSuccess(),
+        error: (err) => this.errorHandlingService.handleErrors(err),
+      });
   }
 
-  onCancel(): void {
-    this.router.navigate(['/role']);
+  private onSuccess(): void {
+    this.notificationService.success('Salvo com sucesso');
+    this.router.navigate(this.routes.LINKS.ROLE.LIST);
+  }
+
+  public onCancel(): void {
+    this.router.navigate(this.routes.LINKS.ROLE.LIST);
   }
 }

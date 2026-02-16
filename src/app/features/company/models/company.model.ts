@@ -1,6 +1,6 @@
 export interface Company {
-  id: number | null;
+  id?: number | string | null;
   name: string;
   cnpj: string;
-  FoundationDate: string | null;
+  foundationDate: string | null;
 }

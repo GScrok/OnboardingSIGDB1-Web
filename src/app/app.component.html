@@ -1,11 +1,13 @@
+<app-loader></app-loader>
+
 <mat-toolbar color="primary">
-  <button mat-button routerLink="/company" routerLinkActive="active-link">
+  <button mat-button [routerLink]="routes.LINKS.COMPANY.LIST" routerLinkActive="active-link">
     Empresas
   </button>
-  <button mat-button routerLink="/employee" routerLinkActive="active-link">
+  <button mat-button [routerLink]="routes.LINKS.EMPLOYEE.LIST" routerLinkActive="active-link">
     Funcionários
   </button>
-  <button mat-button routerLink="/role" routerLinkActive="active-link">
+  <button mat-button [routerLink]="routes.LINKS.ROLE.LIST" routerLinkActive="active-link">
     Cargos
   </button>
 

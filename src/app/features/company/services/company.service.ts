@@ -1,56 +1,15 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 
+import { BaseService } from 'src/app/core/base/base.service';
 import { Company } from '../models/company.model';
 import { CompanyFilter } from '../models/company.filter.model';
 
-import { map } from 'rxjs/operators';
+@Injectable()
+export class CompanyService extends BaseService<Company, CompanyFilter> {
 
-@Injectable({
-  providedIn: 'root',
-})
-export class CompanyService {
-  private apiPath = `${environment.apiUrl}/empresas`;
-
-  constructor(private http: HttpClient) {}
-
-  getAll(): Observable<Company[]> {
-    return this.http
-      .get<any>(this.apiPath)
-      .pipe(map((response) => response.data));
-  }
-
-  getById(id: number): Observable<Company> {
-    return this.http
-      .get<any>(`${this.apiPath}/${id}`)
-      .pipe(map((response) => response.data));
-  }
-
-  getByFilters(filter: CompanyFilter): Observable<Company[]> {
-    const options = { 
-        params: filter as any
-      };
-
-    return this.http
-      .get<any>(`${this.apiPath}/pesquisar`, options)
-      .pipe(map((response) => response.data));
-  }
-
-  create(company: Company): Observable<Company> {
-    return this.http
-      .post<any>(this.apiPath, company)
-      .pipe(map((response) => response.data));
-  }
-
-  update(company: Company): Observable<Company> {
-    return this.http
-      .put<any>(`${this.apiPath}/${company.id}`, company)
-      .pipe(map((response) => response.data));
-  }
-
-  delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiPath}/${id}`);
+  constructor(protected override http: HttpClient) {
+    super(http, `${environment.apiUrl}/empresas`);
   }
 }

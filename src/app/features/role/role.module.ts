@@ -13,6 +13,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RoleRoutingModule } from './role-routing.module';
 import { RoleListComponent } from './components/role-list/role-list.component';
 import { RoleFormComponent } from './components/role-form/role-form.component';
+import { RoleService } from './services/role.service';
 
 @NgModule({
   declarations: [
@@ -30,6 +31,7 @@ import { RoleFormComponent } from './components/role-form/role-form.component';
     MatFormFieldModule,
     MatMenuModule,
     MatProgressSpinnerModule,
-  ]
+  ],
+  providers: [RoleService]
 })
 export class RoleModule { }

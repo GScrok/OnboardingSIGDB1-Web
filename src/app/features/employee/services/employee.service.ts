@@ -9,49 +9,14 @@ import { Employee } from '../models/employee.model';
 import { EmployeeFilter } from '../models/employee.filter.model';
 import { EmployeeRole } from '../models/employee-role.model';
 import { EmployeeRoleHistory } from '../models/employee-role-history.model';
+import { BaseService } from 'src/app/core/base/base.service';
 
-@Injectable({ providedIn: 'root' })
-export class EmployeeService {
+@Injectable()
+export class EmployeeService extends BaseService<Employee, EmployeeFilter>{
   private apiPath = `${environment.apiUrl}/funcionarios`;
 
-  constructor(private http: HttpClient) {}
-
-  getAll(): Observable<Employee[]> {
-    return this.http
-      .get<any>(this.apiPath)
-      .pipe(map((response) => response.data));
-  }
-
-  getById(id: number): Observable<Employee> {
-    return this.http
-      .get<any>(`${this.apiPath}/${id}`)
-      .pipe(map((response) => response.data));
-  }
-
-  getByFilters(filter: EmployeeFilter): Observable<Employee[]> {
-    const options = {
-      params: filter as any,
-    };
-
-    return this.http
-      .get<any>(`${this.apiPath}/pesquisar`, options)
-      .pipe(map((response) => response.data));
-  }
-
-  create(employee: Employee): Observable<Employee> {
-    return this.http
-      .post<any>(this.apiPath, employee)
-      .pipe(map((response) => response.data));
-  }
-
-  update(employee: Employee): Observable<Employee> {
-    return this.http
-      .put<any>(`${this.apiPath}/${employee.id}`, employee)
-      .pipe(map((response) => response.data));
-  }
-
-  delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiPath}/${id}`);
+  constructor(protected override http: HttpClient) {
+    super(http, `${environment.apiUrl}/funcionarios`)
   }
 
   linkRole(id: number, employeeRole: EmployeeRole): Observable<EmployeeRole> {

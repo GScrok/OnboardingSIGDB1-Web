@@ -1,15 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { CompanyService } from '../../services/company.service';
-import { finalize } from 'rxjs/operators';
+
+import { AppRoutes } from 'src/app/shared/app-routes.config';
 
 import { Company } from '../../models/company.model';
 import { CompanyFilter } from './../../models/company.filter.model';
 
 import { DateUtils } from 'src/app/shared/date-utils';
-
-import { ToastrService } from 'ngx-toastr';
-import Swal from 'sweetalert2';
+import { NotificationService } from 'src/app/core/notification/notification.service';
+import { ErrorHandlingService } from 'src/app/core/error-handling/error-handling.service';
 
 @Component({
   selector: 'app-company-list',
@@ -17,7 +17,7 @@ import Swal from 'sweetalert2';
   styleUrls: ['./company-list.component.scss'],
 })
 export class CompanyListComponent implements OnInit {
-  isLoading = false;
+  protected routes = AppRoutes;
 
   companies: Company[] = [];
   displayedColumns: string[] = [
@@ -28,43 +28,48 @@ export class CompanyListComponent implements OnInit {
     'actions',
   ];
 
-  filterForm: FormGroup;
+  filterForm!: FormGroup;
 
   constructor(
     private companyService: CompanyService,
     private fb: FormBuilder,
     private dateUtils: DateUtils,
-    private toastr: ToastrService,
-  ) {
-    this.filterForm = this.fb.group({
-      name: [''],
-      cnpj: [''],
-      startDate: [''],
-      endDate: [''],
-    });
-  }
+    private notificationService: NotificationService,
+    private errorHandlingService: ErrorHandlingService,
+  ) {}
 
   ngOnInit(): void {
     this.loadCompanies();
+
+    this.buildCleanCompanyFilter();
   }
 
-  loadCompanies(): void {
-    this.isLoading = true;
-
+  private loadCompanies(): void {
     this.companyService
       .getAll()
-      .pipe(finalize(() => (this.isLoading = false)))
       .subscribe({
         next: (data) => (this.companies = data),
-        error: (err) => {
-          console.error(err);
-          this.toastr.error('Erro ao carregar empresas.', 'Erro');
-        },
+        error: () => this.errorHandlingService.handleGenericError(),
       });
   }
 
-  onFilter(): void {
-    const payload: CompanyFilter = {
+  public onFilter(): void {
+    const payload: CompanyFilter = this.createPayloadCompanyFilter();
+
+    this.filterCompany(payload);
+  }
+
+  private filterCompany(payload: CompanyFilter) {
+    this.companyService
+      .getByFilters(payload)
+      .subscribe({
+        next: (data) => (this.companies = data),
+        error: (err) => this.errorHandlingService.handleErrors(err),
+      });
+  }
+
+  private createPayloadCompanyFilter(): CompanyFilter {
+    return {
       name: String(this.filterForm.value.name),
       cnpj: this.filterForm.value.cnpj,
       startDate: this.dateUtils.formatDateForFilter(
@@ -74,67 +79,41 @@ export class CompanyListComponent implements OnInit {
         this.filterForm.value.endDate,
       ),
     };
+  }
 
-    this.isLoading = true;
+  public clearFilter(): void {
+    this.buildCleanCompanyFilter();
+  }
 
+  public async deleteCompany(id: number): Promise<void> {
+    const result = await this.notificationService.confirmation(
+      'Deseja excluir esta empresa?',
+      'Você não poderá reverter isso!',
+    );
+
+    if (result.isConfirmed) {
+      this.executeDelete(id);
+    }
+  }
+
+  private executeDelete(id: number): void {
     this.companyService
-      .getByFilters(payload)
-      .pipe(finalize(() => (this.isLoading = false)))
+      .delete(id)
       .subscribe({
-        next: (data) => (this.companies = data),
-        error: (err) => {
-          if (err.error && err.error.errors) {
-            const errorList = err.error.errors;
-
-            errorList.forEach((mensagem: string) => {
-              this.toastr.error(mensagem, 'Erro');
-            });
-          } else {
-            this.toastr.error('Ocorreu um erro inesperado.', 'Erro');
-          }
+        next: () => {
+          this.notificationService.success('Deletado com sucesso.');
+          this.loadCompanies();
         },
+        error: (err) => this.errorHandlingService.handleErrors(err),
       });
   }
 
-  clearFilter(): void {
-    this.filterForm.reset();
-  }
-
-  deleteCompany(id: number): void {
-    Swal.fire({
-      title: 'Deseja excluir esta empresa?',
-      text: 'Você não poderá reverter isso!',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Sim, deletar!',
-      cancelButtonText: 'Cancelar',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.isLoading = true;
-
-        this.companyService
-          .delete(id)
-          .pipe(finalize(() => (this.isLoading = false)))
-          .subscribe({
-            next: () => {
-              this.toastr.success('Deletado com sucesso.', 'Sucesso!');
-              this.loadCompanies();
-            },
-            error: (err) => {
-              if (err.error && err.error.errors) {
-                const errorList = err.error.errors;
-
-                errorList.forEach((mensagem: string) => {
-                  this.toastr.error(mensagem, 'Erro');
-                });
-              } else {
-                this.toastr.error('Ocorreu um erro inesperado.', 'Erro');
-              }
-            },
-          });
-      }
+  private buildCleanCompanyFilter() {
+    this.filterForm = this.fb.group({
+      name: [''],
+      cnpj: [''],
+      startDate: [''],
+      endDate: [''],
     });
   }
 }

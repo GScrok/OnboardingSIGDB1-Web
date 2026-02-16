@@ -1,11 +1,7 @@
-<div class="loading-overlay" *ngIf="isLoading">
-  <mat-spinner diameter="50"></mat-spinner>
-</div>
-
 <div class="page-container">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Listagem de Cargos</h2>
-    <button mat-raised-button color="primary" routerLink="/role/new">
+    <button mat-raised-button color="primary" [routerLink]="routes.LINKS.ROLE.NEW">
       Novo
     </button>
   </div>
@@ -59,7 +55,7 @@
           </button>
 
           <mat-menu #menu="matMenu">
-            <button mat-menu-item [routerLink]="['/role/edit', element.id]">
+            <button mat-menu-item [routerLink]="routes.LINKS.ROLE.EDIT(element.id)">
               <mat-icon>edit</mat-icon>
               <span>Editar</span>
             </button>
