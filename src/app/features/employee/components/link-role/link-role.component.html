@@ -22,9 +22,9 @@
               {{ role.description }}
             </mat-option>
           </mat-select>
-          <mat-error
+          <mat-error id="errorRoleIdRequired"
             *ngIf="employeeRoleForm.get('roleId')?.hasError('required')"
-            >Requirido</mat-error
+            >Campo obrigatório</mat-error
           >
         </mat-form-field>
       </div>
@@ -45,9 +45,9 @@
           ></mat-datepicker-toggle>
           <mat-datepicker #picker></mat-datepicker>
 
-          <mat-error
+          <mat-error id="errorStartDateRequired"
             *ngIf="employeeRoleForm.get('startDate')?.hasError('required')"
-            >Requirido</mat-error
+            >Campo obrigatório</mat-error
           >
         </mat-form-field>
       </div>

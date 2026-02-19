@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RoleListComponent } from './role-list.component';
-import { NO_ERRORS_SCHEMA } from '@angular/compiler';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { RoleService } from '../../services/role.service';
 import { NotificationService } from 'src/app/core/notification/notification.service';
 import { ErrorHandlingService } from 'src/app/core/error-handling/error-handling.service';

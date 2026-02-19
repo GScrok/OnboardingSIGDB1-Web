@@ -10,6 +10,7 @@ import { EmployeeFilter } from '../models/employee.filter.model';
 import { EmployeeRole } from '../models/employee-role.model';
 import { EmployeeRoleHistory } from '../models/employee-role-history.model';
 import { BaseService } from 'src/app/core/base/base.service';
+import { BaseResponseModel } from 'src/app/core/base/base.response.model';
 
 @Injectable()
 export class EmployeeService extends BaseService<Employee, EmployeeFilter>{
@@ -21,13 +22,13 @@ export class EmployeeService extends BaseService<Employee, EmployeeFilter>{
 
   linkRole(id: number, employeeRole: EmployeeRole): Observable<EmployeeRole> {
     return this.http
-      .post<any>(`${this.apiPath}/${id}/cargos`, employeeRole)
+      .post<BaseResponseModel>(`${this.apiPath}/${id}/cargos`, employeeRole)
       .pipe(map((response) => response.data));
   }
 
   getRoleHistory(id: number): Observable<EmployeeRoleHistory[]> {
     return this.http
-      .get<any>(`${this.apiPath}/${id}/cargos`)
+      .get<BaseResponseModel>(`${this.apiPath}/${id}/cargos`)
       .pipe(map((response) => response.data));
   }
 }
