@@ -1,9 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
-import { Base } from './base.model';
-import { BaseFilter } from './base.filter.model';
+import { BaseModel } from './base.model';
+import { BaseFilterModel } from './base.filter.model';
+import { BaseResponseModel } from './base.response.model';
 
-export abstract class BaseService<T extends Base, F extends BaseFilter> {
+export abstract class BaseService<T extends BaseModel, F extends BaseFilterModel> {
   protected constructor(
     protected http: HttpClient,
     protected apiUrl: string,
@@ -11,13 +12,13 @@ export abstract class BaseService<T extends Base, F extends BaseFilter> {
 
   getAll(): Observable<T[]> {
     return this.http
-      .get<any>(this.apiUrl)
+      .get<BaseResponseModel>(this.apiUrl)
       .pipe(map((response) => response.data));
   }
 
   getById(id: number): Observable<T> {
     return this.http
-      .get<any>(`${this.apiUrl}/${id}`)
+      .get<BaseResponseModel>(`${this.apiUrl}/${id}`)
       .pipe(map((response) => response.data));
   }
 
@@ -27,19 +28,19 @@ export abstract class BaseService<T extends Base, F extends BaseFilter> {
     };
 
     return this.http
-      .get<any>(`${this.apiUrl}/pesquisar`, options)
+      .get<BaseResponseModel>(`${this.apiUrl}/pesquisar`, options)
       .pipe(map((response) => response.data));
   }
 
   create(item: T): Observable<T> {
     return this.http
-      .post<any>(this.apiUrl, item)
+      .post<BaseResponseModel>(this.apiUrl, item)
       .pipe(map((response) => response.data));
   }
 
   update(company: T): Observable<T> {
     return this.http
-      .put<any>(`${this.apiUrl}/${company.id}`, company)
+      .put<BaseResponseModel>(`${this.apiUrl}/${company.id}`, company)
       .pipe(map((response) => response.data));
   }
 

@@ -11,7 +11,7 @@
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>Nome</mat-label>
           <input matInput formControlName="name" placeholder="Ex: DB1 Group">
-          <mat-error *ngIf="companyForm.get('name')?.hasError('required')">
+          <mat-error id="errorNameRequired" *ngIf="companyForm.get('name')?.hasError('required')">
             Campo obrigatório
           </mat-error>
           <mat-error *ngIf="companyForm.get('name')?.hasError('maxlength')">
@@ -26,7 +26,7 @@
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>CNPJ</mat-label>
           <input matInput formControlName="cnpj" mask="00.000.000/0000-00" placeholder="00.000.000/0000-00">
-          <mat-error *ngIf="companyForm.get('cnpj')?.hasError('required')">
+          <mat-error id="errorCnpjRequired" *ngIf="companyForm.get('cnpj')?.hasError('required')">
             Campo obrigatório
           </mat-error>
         </mat-form-field>

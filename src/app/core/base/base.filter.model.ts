@@ -1,2 +1,2 @@
-export interface BaseFilter {
+export interface BaseFilterModel {
 }
