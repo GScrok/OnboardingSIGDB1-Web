@@ -142,7 +142,6 @@ describe('CompanyFormComponent', () => {
     expect(saveButton.disabled).toBe(true);
   });
 
-
   it('deve navegar para a lista ao cancelar', () => {
     fixture.detectChanges();
 

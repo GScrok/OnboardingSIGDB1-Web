@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RoleFormComponent } from './role-form.component';
-import { NO_ERRORS_SCHEMA } from '@angular/compiler';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DateUtils } from 'src/app/shared/date-utils';

@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 import { CompanyService } from '../../services/company.service';
 import { DateUtils } from 'src/app/shared/date-utils';
 import { of, throwError } from 'rxjs';
-import { NO_ERRORS_SCHEMA } from '@angular/compiler';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('CompanyListComponent', () => {
   let component: CompanyListComponent;
