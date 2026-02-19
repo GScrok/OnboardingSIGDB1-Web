@@ -9,7 +9,7 @@
           <mat-label>Descrição</mat-label>
           <input matInput formControlName="description" placeholder="Ex: Desenvolvedor Front-end">
 
-          <mat-error *ngIf="roleForm.get('description')?.hasError('required')">
+          <mat-error id="errorDescriptionRequired" *ngIf="roleForm.get('description')?.hasError('required')">
             Campo obrigatório
           </mat-error>
           <mat-error *ngIf="roleForm.get('description')?.hasError('maxlength')">
